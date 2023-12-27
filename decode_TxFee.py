@@ -26,10 +26,15 @@ def get_bitcoin_transactions(address, price):
     for item in data:
         print("Transaction Details:")
         # Transaction input details
-        txid = item["vin"][0]['txid']
-        in_value = item["vin"][0]["prevout"]["value"]
-        print(f"Input Transaction ID: {txid}")
-        print(f"Input Value: {in_value} satoshis")
+        vin_length = len(item["vin"])
+        for i in range(vin_length):
+            txid = item["vin"][0]['txid']
+            if item["vin"][i]["prevout"]["scriptpubkey_address"]==address:
+                in_value = item["vin"][i]["prevout"]["value"]
+            else:
+                continue
+            print(f"Input Transaction ID: {txid}")
+            print(f"Input Value: {in_value} satoshis")
 
         # Transaction output details
         out_length = len(item["vout"])
@@ -37,10 +42,11 @@ def get_bitcoin_transactions(address, price):
             if item["vout"][i]["scriptpubkey_address"] == address:
                 print(f"Output Transaction Index: {i}")
                 out_value = item["vout"][i]["value"]
+                cost = in_value - out_value
                 print(f"Output Value: {out_value} satoshis")
+            else:
+                cost = in_value
 
-        # Calculating cost
-        cost = in_value - out_value
         # Convert Satoshis to Bitcoins
         btc_amount = cost / 100000000
         print(f"Cost value: {cost} satoshis")
